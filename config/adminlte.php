@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<b>Admin</b>LTE',
+    'logo' => '<b>PlaySpot</b>',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -311,39 +311,34 @@ return [
             'url'  => 'admin/blog',
             'can'  => 'manage-blog',
         ],
-
-
-
+        [
+            'text'        => 'Dashboard',
+            'route'       => 'dashboard',
+            'icon'        => 'fas fa-tachometer-alt',
+        ],
+        [
+            'text'        => 'Reservas',
+            'route'       => 'reservas.index',
+            'icon'        => 'fas fa-calendar-alt',
+            'can'         => 'admin.reservas.index',
+        ],
+        [
+            'text'        => 'Calendario',
+            'route'       => 'reservas.calendario',
+            'icon'        => 'fas fa-calendar',
+            'can'         => 'admin.reservas.calendario',
+        ],
+        [
+            'text'        => 'Canchas',
+            'route'       => 'canchas.index',
+            'icon'        => 'fas fa-futbol',
+            'can'         => 'admin.canchas.index',
+        ],
         [
             'text'        => 'Clientes',
-            'route'         => 'clientes.index', //apunta a ruta url route
-            'icon'        => 'fa fa-user',
-            'can'  => 'admin.clientes.index',
-
-        ],
-
-        [
-            'text'        => 'Proyectos',
-            'route'         => 'proyectos.index',
-            'icon'        => 'fa fa-cube',
-            'can'  => 'admin.proyectos.index',
-
-        ],
-
-        [
-            'text'        => 'Actividades',
-            'route'         => 'actividades.index', //apunta a ruta url route
-            'icon'        => 'fa fa-cubes',
-            'can'  => 'admin.actividad.index',
-
-        ],
-
-        [
-            'text'        => 'Tareas',
-            'route'         => 'tareas.index', //apunta a ruta url route
-            'icon'        => 'fa fa-envelope',
-            'can'  => 'admin.tareas.index',
-
+            'route'       => 'clientes.index',
+            'icon'        => 'fas fa-users',
+            'can'         => 'admin.clientes.index',
         ],
 
 

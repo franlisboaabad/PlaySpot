@@ -29,6 +29,27 @@ class RoleSeeder extends Seeder
                 'admin.usuarios.edit' => 'Editar usuario',
                 'admin.usuarios.update' => 'Actualizar usuario y asignar roles',
             ],
+            'canchas' => [
+                'admin.canchas.index' => 'Lista de canchas',
+                'admin.canchas.create' => 'Crear cancha',
+                'admin.canchas.edit' => 'Editar cancha',
+                'admin.canchas.destroy' => 'Eliminar cancha',
+            ],
+            'clientes' => [
+                'admin.clientes.index' => 'Lista de clientes',
+                'admin.clientes.create' => 'Crear cliente',
+                'admin.clientes.edit' => 'Editar cliente',
+                'admin.clientes.show' => 'Ver cliente',
+                'admin.clientes.destroy' => 'Eliminar cliente',
+            ],
+            'reservas' => [
+                'admin.reservas.index' => 'Lista de reservas',
+                'admin.reservas.create' => 'Crear reserva',
+                'admin.reservas.edit' => 'Editar reserva',
+                'admin.reservas.show' => 'Ver reserva',
+                'admin.reservas.destroy' => 'Eliminar reserva',
+                'admin.reservas.calendario' => 'Ver calendario de reservas',
+            ],
         ];
     }
 

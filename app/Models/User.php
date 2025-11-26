@@ -42,4 +42,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Un usuario puede crear muchas reservas
+     */
+    public function reservasCreadas()
+    {
+        return $this->hasMany(Reserva::class);
+    }
 }

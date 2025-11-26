@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(RoleSeeder::class);
+        $this->call(CanchaSeeder::class);
 
         \App\Models\User::factory()->create(
             [
