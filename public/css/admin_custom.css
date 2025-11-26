@@ -1,0 +1,177 @@
+/* Responsive adjustments for mobile and desktop */
+
+/* Botones que se apilan en móvil y se muestran inline en desktop */
+@media (min-width: 768px) {
+    .btn-md-inline {
+        display: inline-block !important;
+        width: auto !important;
+        margin-right: 0.5rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    .btn-md-inline:last-child {
+        margin-right: 0 !important;
+    }
+
+    /* Formularios inline en desktop */
+    .form-inline .form-group {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 0.5rem;
+    }
+
+    .form-inline .form-control {
+        width: auto;
+        display: inline-block;
+    }
+
+    /* Botones en headers de cards */
+    .card-header .btn {
+        margin-right: 0.5rem;
+    }
+
+    .card-header .btn:last-child {
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .btn-md-inline {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+        margin-right: 0 !important;
+    }
+
+    .btn-md-inline:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Ajustes para formularios en móvil */
+    .form-control {
+        font-size: 16px; /* Previene zoom en iOS */
+    }
+
+    /* Tablas responsivas */
+    .table-responsive {
+        border: none;
+    }
+
+    /* Cards con mejor espaciado en móvil */
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Headers de cards más compactos */
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+
+    /* Ajustes para el calendario en móvil */
+    .fc-toolbar {
+        flex-direction: column;
+    }
+
+    .fc-toolbar-chunk {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Mejor espaciado en modales */
+    .modal-body {
+        padding: 1rem;
+    }
+
+    /* Botones de acción en tablas más visibles */
+    .btn-group-vertical .btn {
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 575px) {
+    .small-box .inner h3 {
+        font-size: 1.5rem;
+    }
+
+    .small-box .inner p {
+        font-size: 0.85rem;
+    }
+
+    /* Headers más compactos */
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h5 {
+        font-size: 1rem;
+    }
+}
+
+/* Mejoras generales de accesibilidad en móvil */
+@media (max-width: 767px) {
+    /* Asegurar que los inputs sean fáciles de tocar */
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+        min-height: 44px;
+    }
+
+    /* Botones más grandes para facilitar el toque */
+    .btn {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+    }
+
+    /* Mejor espaciado entre elementos */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    /* Formularios inline en móvil */
+    .form-inline {
+        display: block;
+    }
+
+    .form-inline .form-group {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-inline .form-control {
+        width: 100%;
+        display: block;
+    }
+
+    /* Botones de grupo en móvil */
+    .btn-group {
+        width: 100%;
+        display: flex;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+    }
+}
+
+/* Ajustes para desktop - mejor espaciado y alineación */
+@media (min-width: 992px) {
+    /* Mejor espaciado en cards */
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Tablas con mejor espaciado */
+    .table td, .table th {
+        padding: 0.75rem;
+    }
+
+    /* Formularios con mejor distribución */
+    .form-row .form-group {
+        margin-bottom: 1rem;
+    }
+}
+

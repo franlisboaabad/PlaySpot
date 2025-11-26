@@ -125,7 +125,7 @@
 
     <div class="row">
         <!-- Próximas Reservas -->
-        <div class="col-md-8">
+        <div class="col-12 col-md-8 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
@@ -134,17 +134,18 @@
                     </h3>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Horario</th>
-                                <th>Cancha</th>
-                                <th>Cliente</th>
-                                <th>Teléfono</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Horario</th>
+                                    <th>Cancha</th>
+                                    <th>Cliente</th>
+                                    <th class="d-none d-md-table-cell">Teléfono</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             @forelse($proximasReservas as $reserva)
                                 <tr>
@@ -152,7 +153,7 @@
                                     <td>{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</td>
                                     <td>{{ $reserva->cancha->nombre }}</td>
                                     <td>{{ $reserva->cliente->nombre }}</td>
-                                    <td>{{ $reserva->cliente->telefono }}</td>
+                                    <td class="d-none d-md-table-cell">{{ $reserva->cliente->telefono }}</td>
                                     <td>
                                         @if($reserva->estado == 'confirmada')
                                             <span class="badge badge-success">Confirmada</span>
@@ -172,6 +173,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
                 <div class="card-footer text-right">
                     <a href="{{ route('reservas.index') }}" class="btn btn-sm btn-primary">
@@ -182,7 +184,7 @@
         </div>
 
         <!-- Reservas por Cancha (últimos 7 días) -->
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">

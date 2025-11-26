@@ -10,21 +10,21 @@
     <div class="card">
         <div class="card-header">
             <div class="row">
-                <div class="col-md-6">
-                    <a href="{{ route('reservas.create') }}" class="btn btn-primary">
+                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                    <a href="{{ route('reservas.create') }}" class="btn btn-primary btn-sm btn-md-inline">
                         <i class="fas fa-plus"></i> Nueva Reserva
                     </a>
-                    <a href="{{ route('reservas.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('reservas.index') }}" class="btn btn-secondary btn-sm btn-md-inline">
                         <i class="fas fa-list"></i> Ver Lista
                     </a>
                 </div>
-                <div class="col-md-6 text-right">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="cambiarCancha(0)">
+                <div class="col-12 col-md-6">
+                    <div class="btn-group btn-group-sm float-md-right" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="cambiarCancha(0)">
                             Todas
                         </button>
                         @foreach($canchas as $cancha)
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="cambiarCancha({{ $cancha->id }})">
+                            <button type="button" class="btn btn-outline-primary" onclick="cambiarCancha({{ $cancha->id }})">
                                 {{ $cancha->nombre }}
                             </button>
                         @endforeach
@@ -51,12 +51,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
+                initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
                 locale: 'es',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: window.innerWidth < 768 ? 'timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 events: function(fetchInfo, successCallback, failureCallback) {
                     fetch('{{ route("api.reservas.calendario") }}?cancha=' + canchaFiltro)
@@ -79,14 +79,14 @@
                     // Obtener la hora del click
                     let horaInicio = '';
                     let horaFin = '';
-                    
+
                     if (info.allDay === false && info.date) {
                         // Si es un click en un slot de tiempo específico
                         const fecha = new Date(info.date);
                         const horas = fecha.getHours().toString().padStart(2, '0');
                         const minutos = fecha.getMinutes().toString().padStart(2, '0');
                         horaInicio = horas + ':' + minutos;
-                        
+
                         // Calcular hora fin (1 hora después por defecto)
                         const horaFinDate = new Date(fecha);
                         horaFinDate.setHours(horaFinDate.getHours() + 1);
@@ -94,28 +94,38 @@
                         const minutosFin = horaFinDate.getMinutes().toString().padStart(2, '0');
                         horaFin = horasFin + ':' + minutosFin;
                     }
-                    
+
                     // Construir URL con parámetros
                     let url = '{{ route("reservas.create") }}?fecha=' + info.dateStr.split('T')[0];
-                    
+
                     if (canchaFiltro > 0) {
                         url += '&cancha_id=' + canchaFiltro;
                     }
-                    
+
                     if (horaInicio) {
                         url += '&hora_inicio=' + horaInicio;
                     }
-                    
+
                     if (horaFin) {
                         url += '&hora_fin=' + horaFin;
                     }
-                    
+
                     window.location.href = url;
                 },
                 slotMinTime: '00:00:00',
                 slotMaxTime: '24:00:00',
                 height: 'auto',
-                allDaySlot: false
+                allDaySlot: false,
+                // Configuración responsiva
+                windowResize: function() {
+                    if (window.innerWidth < 768) {
+                        calendar.changeView('timeGridDay');
+                    } else {
+                        if (calendar.view.type === 'timeGridDay') {
+                            calendar.changeView('timeGridWeek');
+                        }
+                    }
+                }
             });
 
             calendar.render();

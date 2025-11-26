@@ -14,7 +14,7 @@
                 @method('PUT')
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="cliente_id">Cliente *</label>
                             <select name="cliente_id" id="cliente_id" class="form-control @error('cliente_id') is-invalid @enderror" required>
@@ -32,7 +32,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="cancha_id">Cancha *</label>
                             <select name="cancha_id" id="cancha_id" class="form-control @error('cancha_id') is-invalid @enderror" required>
@@ -52,7 +52,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-6 col-lg-3">
                         <div class="form-group">
                             <label for="fecha">Fecha *</label>
                             <input type="date" name="fecha" id="fecha"
@@ -66,7 +66,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-6 col-lg-3">
                         <div class="form-group">
                             <label for="hora_inicio">Hora Inicio *</label>
                             <input type="time" name="hora_inicio" id="hora_inicio"
@@ -80,7 +80,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-6 col-lg-3">
                         <div class="form-group">
                             <label for="hora_fin">Hora Fin *</label>
                             <input type="time" name="hora_fin" id="hora_fin"
@@ -94,7 +94,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-6 col-lg-3">
                         <div class="form-group">
                             <label for="estado">Estado *</label>
                             <select name="estado" id="estado" class="form-control @error('estado') is-invalid @enderror" required>
@@ -124,10 +124,10 @@
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-md-inline">
                         <i class="fas fa-save"></i> Actualizar Reserva
                     </button>
-                    <a href="{{ route('reservas.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('reservas.index') }}" class="btn btn-secondary btn-md-inline">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>

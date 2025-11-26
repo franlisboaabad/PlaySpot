@@ -10,9 +10,10 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <h5>Información de la Reserva</h5>
-                    <table class="table table-bordered">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
                         <tr>
                             <th>ID:</th>
                             <td>{{ $reserva->id }}</td>
@@ -50,11 +51,13 @@
                         </tr>
                         @endif
                     </table>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <h5>Información del Cliente</h5>
-                    <table class="table table-bordered">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
                         <tr>
                             <th>Nombre:</th>
                             <td>{{ $reserva->cliente->nombre }}</td>
@@ -76,9 +79,11 @@
                         </tr>
                         @endif
                     </table>
+                    </div>
 
-                    <h5>Información del Sistema</h5>
-                    <table class="table table-bordered">
+                    <h5 class="mt-3">Información del Sistema</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
                         <tr>
                             <th>Creada por:</th>
                             <td>{{ $reserva->usuario->name }}</td>
@@ -88,14 +93,15 @@
                             <td>{{ $reserva->created_at->format('d/m/Y H:i') }}</td>
                         </tr>
                     </table>
+                    </div>
                 </div>
             </div>
 
             <div class="mt-3">
-                <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-warning">
+                <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-warning btn-md-inline">
                     <i class="fas fa-edit"></i> Editar
                 </a>
-                <a href="{{ route('reservas.index') }}" class="btn btn-secondary">
+                <a href="{{ route('reservas.index') }}" class="btn btn-secondary btn-md-inline">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>

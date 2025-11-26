@@ -37,10 +37,10 @@
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-md-inline">
                         <i class="fas fa-save"></i> Guardar
                     </button>
-                    <a href="{{ route('canchas.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('canchas.index') }}" class="btn btn-secondary btn-md-inline">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>

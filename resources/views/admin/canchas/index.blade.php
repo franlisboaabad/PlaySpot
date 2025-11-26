@@ -23,49 +23,65 @@
                 </div>
             @endif
 
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($canchas as $cancha)
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
                         <tr>
-                            <td>{{ $cancha->id }}</td>
-                            <td>{{ $cancha->nombre }}</td>
-                            <td>{{ $cancha->descripcion ?? '-' }}</td>
-                            <td>
-                                @if($cancha->activa)
-                                    <span class="badge badge-success">Activa</span>
-                                @else
-                                    <span class="badge badge-danger">Inactiva</span>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('canchas.edit', $cancha) }}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('canchas.destroy', $cancha) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar esta cancha?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th class="d-none d-md-table-cell">Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center">No hay canchas registradas</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse($canchas as $cancha)
+                            <tr>
+                                <td>{{ $cancha->id }}</td>
+                                <td>{{ $cancha->nombre }}</td>
+                                <td class="d-none d-md-table-cell">{{ $cancha->descripcion ?? '-' }}</td>
+                                <td>
+                                    @if($cancha->activa)
+                                        <span class="badge badge-success">Activa</span>
+                                    @else
+                                        <span class="badge badge-danger">Inactiva</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="btn-group-vertical btn-group-sm d-md-none" role="group">
+                                        <a href="{{ route('canchas.edit', $cancha) }}" class="btn btn-warning mb-1">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('canchas.destroy', $cancha) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar esta cancha?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="btn-group d-none d-md-inline-flex" role="group">
+                                        <a href="{{ route('canchas.edit', $cancha) }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('canchas.destroy', $cancha) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar esta cancha?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">No hay canchas registradas</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @stop

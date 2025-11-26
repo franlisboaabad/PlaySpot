@@ -14,7 +14,7 @@
                 @method('PUT')
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="nombre">Nombre *</label>
                             <input type="text" name="nombre" id="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre', $cliente->nombre) }}" required>
@@ -26,7 +26,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="telefono">Teléfono *</label>
                             <input type="text" name="telefono" id="telefono" class="form-control @error('telefono') is-invalid @enderror" value="{{ old('telefono', $cliente->telefono) }}" required>
@@ -40,7 +40,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $cliente->email) }}">
@@ -52,7 +52,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="dni">DNI</label>
                             <input type="text" name="dni" id="dni" class="form-control" value="{{ old('dni', $cliente->dni) }}">
@@ -71,10 +71,10 @@
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-md-inline">
                         <i class="fas fa-save"></i> Actualizar
                     </button>
-                    <a href="{{ route('clientes.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('clientes.index') }}" class="btn btn-secondary btn-md-inline">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>
