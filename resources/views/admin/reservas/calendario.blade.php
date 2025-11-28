@@ -70,10 +70,17 @@
                         });
                 },
                 eventClick: function(info) {
-                    alert('Cliente: ' + info.event.extendedProps.cliente + '\n' +
-                          'Cancha: ' + info.event.extendedProps.cancha + '\n' +
-                          'Teléfono: ' + info.event.extendedProps.telefono + '\n' +
-                          'Estado: ' + info.event.extendedProps.estado);
+                    Swal.fire({
+                        title: 'Información de la Reserva',
+                        html: '<div class="text-left">' +
+                              '<p><strong>Cliente:</strong> ' + info.event.extendedProps.cliente + '</p>' +
+                              '<p><strong>Cancha:</strong> ' + info.event.extendedProps.cancha + '</p>' +
+                              '<p><strong>Teléfono:</strong> ' + info.event.extendedProps.telefono + '</p>' +
+                              '<p><strong>Estado:</strong> ' + info.event.extendedProps.estado + '</p>' +
+                              '</div>',
+                        icon: 'info',
+                        confirmButtonText: 'Cerrar'
+                    });
                 },
                 dateClick: function(info) {
                     // Obtener la hora del click

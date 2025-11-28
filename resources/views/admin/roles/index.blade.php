@@ -23,12 +23,12 @@
                             <td>{{ $role->id }}</td>
                             <td>{{ $role->name }}</td>
                             <td>
-                                <form action="{{ route('roles.destroy', $role) }}" method="POST">
+                                <form action="{{ route('roles.destroy', $role) }}" method="POST" class="form-delete">
 
                                     <a href="{{ route('roles.edit', $role ) }}" class="btn btn-info btn-xs">Editar</a>
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-xs" onclick="return confirm('¿Esta seguro de eliminar el registro?')">Eliminar</button>
+                                    <button type="submit" class="btn btn-danger btn-xs btn-delete" data-title="¿Está seguro de eliminar este rol?" data-text="Esta acción no se puede deshacer.">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
@@ -44,5 +44,33 @@
 @stop
 
 @section('js')
-    <script> console.log('Hi!'); </script>
+    <script>
+        // Interceptar formularios de eliminación con SweetAlert
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.form-delete').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const button = form.querySelector('.btn-delete');
+                    const title = button.getAttribute('data-title') || '¿Está seguro?';
+                    const text = button.getAttribute('data-text') || 'Esta acción no se puede deshacer.';
+
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @stop

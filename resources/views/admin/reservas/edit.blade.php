@@ -136,3 +136,56 @@
     </div>
 @stop
 
+@section('js')
+    <script>
+        // Validación en tiempo real de horas
+        document.addEventListener('DOMContentLoaded', function() {
+            const horaInicio = document.getElementById('hora_inicio');
+            const horaFin = document.getElementById('hora_fin');
+
+            function validarHoras() {
+                const inicio = horaInicio.value;
+                const fin = horaFin.value;
+
+                if (!inicio || !fin) {
+                    return;
+                }
+
+                const inicioTime = new Date('2000-01-01T' + inicio + ':00');
+                let finTime = new Date('2000-01-01T' + fin + ':00');
+
+                // Si la hora fin es menor que inicio, asumimos que cruza medianoche
+                if (finTime <= inicioTime) {
+                    finTime = new Date('2000-01-02T' + fin + ':00');
+                }
+
+                const diferenciaMs = finTime - inicioTime;
+                const diferenciaHoras = diferenciaMs / (1000 * 60 * 60);
+
+                // Remover clases de error previas
+                horaFin.classList.remove('is-invalid', 'is-valid');
+
+                if (diferenciaHoras < 1) {
+                    horaFin.classList.add('is-invalid');
+                    horaFin.setCustomValidity('La hora de fin debe ser al menos 1 hora después de la hora de inicio.');
+                } else if (diferenciaHoras > 24) {
+                    horaFin.classList.add('is-invalid');
+                    horaFin.setCustomValidity('La reserva no puede exceder 24 horas de duración.');
+                } else {
+                    horaFin.classList.add('is-valid');
+                    horaFin.setCustomValidity('');
+                }
+            }
+
+            horaInicio.addEventListener('change', validarHoras);
+            horaFin.addEventListener('change', validarHoras);
+            horaFin.addEventListener('input', validarHoras);
+
+            // Validar al cargar la página si ya hay valores
+            if (horaInicio.value && horaFin.value) {
+                validarHoras();
+            }
+        });
+    </script>
+@stop
+

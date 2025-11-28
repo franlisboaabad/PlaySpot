@@ -340,7 +340,22 @@ return [
             'icon'        => 'fas fa-users',
             'can'         => 'admin.clientes.index',
         ],
-
+        [
+            'text'        => 'Reportes',
+            'icon'        => 'fas fa-chart-bar',
+            'submenu' => [
+                [
+                    'text' => 'Ocupación de Canchas',
+                    'route' => 'reportes.ocupacion',
+                    'icon' => 'fas fa-chart-pie',
+                ],
+            ],
+        ],
+        [
+            'text'        => 'Tutoriales',
+            'route'       => 'tutoriales.index',
+            'icon'        => 'fas fa-book',
+        ],
 
         ['header' => 'account_settings'],
         [
@@ -495,12 +510,17 @@ return [
             ],
         ],
         'Sweetalert2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
+                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@11',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => false,
+                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
                 ],
             ],
         ],

@@ -16,7 +16,7 @@
                     <div class="col-12 col-md-6">
                         <div class="form-group">
                             <label for="cliente_id">Cliente *</label>
-                            <select name="cliente_id" id="cliente_id" class="form-control @error('cliente_id') is-invalid @enderror" required>
+                            <select name="cliente_id" id="cliente_id" class="form-control select2 @error('cliente_id') is-invalid @enderror" required>
                                 <option value="">Seleccione un cliente</option>
                                 @foreach($clientes as $cliente)
                                     <option value="{{ $cliente->id }}">{{ $cliente->nombre }} - {{ $cliente->telefono }}</option>
@@ -60,7 +60,7 @@
                             <input type="date" name="fecha" id="fecha"
                                    class="form-control @error('fecha') is-invalid @enderror"
                                    value="{{ $fechaPreseleccionada ?? old('fecha', date('Y-m-d')) }}"
-                                   min="{{ date('Y-m-d') }}" required>
+                                   required>
                             @error('fecha')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -208,8 +208,47 @@
     </div>
 @stop
 
+@section('css')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+            padding-left: 12px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #007bff;
+        }
+    </style>
+@stop
+
 @section('js')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        // Inicializar Select2 para el campo de cliente
+        $(document).ready(function() {
+            $('#cliente_id').select2({
+                placeholder: 'Seleccione un cliente',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron clientes";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                },
+                width: '100%'
+            });
+        });
+
         let timeoutVerificacion;
 
         // Función para verificar disponibilidad
@@ -329,7 +368,12 @@
             const horaFin = this.value;
 
             if (horaInicio && horaFin && horaFin <= horaInicio) {
-                alert('La hora de fin debe ser mayor que la hora de inicio');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Error en horario',
+                    text: 'La hora de fin debe ser mayor que la hora de inicio',
+                    confirmButtonText: 'Entendido'
+                });
                 this.value = '';
                 return;
             }
@@ -343,7 +387,12 @@
             const btnGuardar = document.getElementById('btnGuardar');
             if (btnGuardar.disabled) {
                 e.preventDefault();
-                alert('Por favor, espere a que se verifique la disponibilidad o seleccione un horario disponible.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Espere por favor',
+                    text: 'Por favor, espere a que se verifique la disponibilidad o seleccione un horario disponible.',
+                    confirmButtonText: 'Entendido'
+                });
                 return false;
             }
         });
@@ -379,36 +428,43 @@
             })
             .then(data => {
                 if (data.success) {
-                    // Agregar el nuevo cliente al select
-                    const selectCliente = document.getElementById('cliente_id');
-                    const option = document.createElement('option');
-                    option.value = data.cliente.id;
-                    option.textContent = data.cliente.nombre + ' - ' + data.cliente.telefono;
-                    option.selected = true;
-                    selectCliente.appendChild(option);
+                    // Agregar el nuevo cliente al select con Select2
+                    const nuevoOption = new Option(
+                        data.cliente.nombre + ' - ' + data.cliente.telefono,
+                        data.cliente.id,
+                        true,
+                        true
+                    );
+                    $('#cliente_id').append(nuevoOption).trigger('change');
 
-                    // Mostrar mensaje de éxito
-                    mensajeCliente.className = 'alert alert-success';
-                    mensajeCliente.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
-                    mensajeCliente.style.display = 'block';
+                    // Mostrar mensaje de éxito con SweetAlert
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Cliente creado!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
 
                     // Limpiar el formulario
                     document.getElementById('formCrearCliente').reset();
 
-                    // Cerrar el modal después de 1 segundo
+                    // Cerrar el modal después de mostrar el mensaje
                     setTimeout(function() {
                         $('#modalCrearCliente').modal('hide');
-                        mensajeCliente.style.display = 'none';
-                    }, 1000);
+                    }, 500);
                 } else {
                     throw new Error(data.message || 'Error al crear el cliente');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                mensajeCliente.className = 'alert alert-danger';
-                mensajeCliente.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (error.message || 'Error al crear el cliente. Por favor, intente nuevamente.');
-                mensajeCliente.style.display = 'block';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al crear el cliente. Por favor, intente nuevamente.',
+                    confirmButtonText: 'Entendido'
+                });
             })
             .finally(() => {
                 btnSubmit.disabled = false;

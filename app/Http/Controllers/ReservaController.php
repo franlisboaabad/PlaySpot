@@ -6,6 +6,8 @@ use App\Models\Reserva;
 use App\Models\Cancha;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReservaController extends Controller
 {
@@ -16,17 +18,41 @@ class ReservaController extends Controller
     {
         $query = Reserva::with(['cancha', 'cliente', 'usuario']);
 
-        if ($request->has('cancha_id')) {
+        // Filtro por cancha
+        if ($request->has('cancha_id') && $request->cancha_id != '') {
             $query->where('cancha_id', $request->cancha_id);
         }
 
-        if ($request->has('fecha')) {
+        // Filtro por rango de fechas
+        if ($request->has('fecha_desde') && $request->fecha_desde != '') {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->has('fecha_hasta') && $request->fecha_hasta != '') {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        }
+
+        // Si solo hay fecha (sin rango), mantener compatibilidad
+        if ($request->has('fecha') && $request->fecha != '' && !$request->has('fecha_desde')) {
             $query->where('fecha', $request->fecha);
+        }
+
+        // Filtro por estado
+        if ($request->has('estado') && $request->estado != '') {
+            $query->where('estado', $request->estado);
+        }
+
+        // Filtro por cliente (búsqueda por nombre)
+        if ($request->has('cliente') && $request->cliente != '') {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->cliente . '%');
+            });
         }
 
         $reservas = $query->orderBy('fecha', 'desc')
             ->orderBy('hora_inicio')
-            ->paginate(20);
+            ->paginate(20)
+            ->appends($request->query());
 
         $canchas = Cancha::where('activa', true)->get();
 
@@ -57,11 +83,59 @@ class ReservaController extends Controller
         $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
             'cancha_id' => 'required|exists:canchas,id',
-            'fecha' => 'required|date|after_or_equal:today',
+            'fecha' => 'required|date',
             'hora_inicio' => 'required|date_format:H:i',
-            'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+            'hora_fin' => 'required|date_format:H:i',
             'observaciones' => 'nullable|string',
         ]);
+
+        // Validar que hora_fin > hora_inicio (maneja reservas que cruzan medianoche)
+        $horaInicio = Carbon::parse($request->hora_inicio);
+        $horaFin = Carbon::parse($request->hora_fin);
+
+        // Si hora_fin es menor que hora_inicio, asumimos que cruza la medianoche
+        if ($horaFin->lt($horaInicio)) {
+            $horaFin->addDay();
+        }
+
+        // Calcular diferencia en horas
+        $diferenciaHoras = $horaInicio->diffInHours($horaFin);
+
+        // Validar que haya al menos 1 hora de diferencia
+        if ($diferenciaHoras < 1) {
+            return back()->withErrors([
+                'hora_fin' => 'La hora de fin debe ser al menos 1 hora después de la hora de inicio.'
+            ])->withInput();
+        }
+
+        // Validar que la reserva no exceda 24 horas
+        if ($diferenciaHoras > 24) {
+            return back()->withErrors([
+                'hora_fin' => 'La reserva no puede exceder 24 horas de duración.'
+            ])->withInput();
+        }
+
+        // Validar que la fecha no sea pasada
+        $fechaReserva = Carbon::parse($request->fecha)->startOfDay();
+        $fechaHoy = Carbon::today();
+
+        if ($fechaReserva->lt($fechaHoy)) {
+            return back()->withErrors([
+                'fecha' => 'No se pueden crear reservas para fechas pasadas.'
+            ])->withInput();
+        }
+
+        // Si es hoy, validar que la hora sea futura
+        if ($fechaReserva->eq($fechaHoy)) {
+            $horaInicio = Carbon::parse($request->fecha . ' ' . $request->hora_inicio);
+            $ahora = Carbon::now();
+
+            if ($horaInicio->lte($ahora)) {
+                return back()->withErrors([
+                    'hora_inicio' => 'No se pueden crear reservas para horas pasadas del día de hoy.'
+                ])->withInput();
+            }
+        }
 
         // Validar disponibilidad
         if (!Reserva::validarDisponibilidad(
@@ -120,10 +194,37 @@ class ReservaController extends Controller
             'cancha_id' => 'required|exists:canchas,id',
             'fecha' => 'required|date',
             'hora_inicio' => 'required|date_format:H:i',
-            'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+            'hora_fin' => 'required|date_format:H:i',
             'estado' => 'required|in:pendiente,confirmada,cancelada,completada',
             'observaciones' => 'nullable|string',
         ]);
+
+        // Validar que hora_fin > hora_inicio (maneja reservas que cruzan medianoche)
+        $horaInicio = Carbon::parse($request->hora_inicio);
+        $horaFin = Carbon::parse($request->hora_fin);
+
+        // Si hora_fin es menor que hora_inicio, asumimos que cruza la medianoche
+        // En ese caso, agregamos 24 horas a hora_fin para la comparación
+        if ($horaFin->lt($horaInicio)) {
+            $horaFin->addDay();
+        }
+
+        // Calcular diferencia en horas
+        $diferenciaHoras = $horaInicio->diffInHours($horaFin);
+
+        // Validar que haya al menos 1 hora de diferencia
+        if ($diferenciaHoras < 1) {
+            return back()->withErrors([
+                'hora_fin' => 'La hora de fin debe ser al menos 1 hora después de la hora de inicio.'
+            ])->withInput();
+        }
+
+        // Validar que la reserva no exceda 24 horas (si cruza medianoche, máximo hasta el día siguiente)
+        if ($diferenciaHoras > 24) {
+            return back()->withErrors([
+                'hora_fin' => 'La reserva no puede exceder 24 horas de duración.'
+            ])->withInput();
+        }
 
         // Validar disponibilidad (excluyendo la reserva actual)
         if (!Reserva::validarDisponibilidad(
@@ -255,5 +356,148 @@ class ReservaController extends Controller
             });
 
         return response()->json($reservas);
+    }
+
+    /**
+     * Exportar reservas a PDF
+     */
+    public function exportarPdf(Request $request)
+    {
+        $query = Reserva::with(['cancha', 'cliente', 'usuario']);
+
+        // Aplicar los mismos filtros que en index
+        if ($request->has('cancha_id') && $request->cancha_id != '') {
+            $query->where('cancha_id', $request->cancha_id);
+        }
+
+        if ($request->has('fecha_desde') && $request->fecha_desde != '') {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->has('fecha_hasta') && $request->fecha_hasta != '') {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->has('fecha') && $request->fecha != '' && !$request->has('fecha_desde')) {
+            $query->where('fecha', $request->fecha);
+        }
+
+        if ($request->has('estado') && $request->estado != '') {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->has('cliente') && $request->cliente != '') {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        $reservas = $query->orderBy('fecha', 'desc')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $filtros = [
+            'cancha' => $request->cancha_id ? Cancha::find($request->cancha_id)?->nombre : 'Todas',
+            'fecha_desde' => $request->fecha_desde ?? 'N/A',
+            'fecha_hasta' => $request->fecha_hasta ?? 'N/A',
+            'estado' => $request->estado ?? 'Todos',
+        ];
+
+        return view('admin.reservas.exportar-pdf', compact('reservas', 'filtros'));
+    }
+
+    /**
+     * Exportar reservas a Excel/CSV
+     */
+    public function exportarExcel(Request $request)
+    {
+        $query = Reserva::with(['cancha', 'cliente', 'usuario']);
+
+        // Aplicar los mismos filtros que en index
+        if ($request->has('cancha_id') && $request->cancha_id != '') {
+            $query->where('cancha_id', $request->cancha_id);
+        }
+
+        if ($request->has('fecha_desde') && $request->fecha_desde != '') {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->has('fecha_hasta') && $request->fecha_hasta != '') {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->has('fecha') && $request->fecha != '' && !$request->has('fecha_desde')) {
+            $query->where('fecha', $request->fecha);
+        }
+
+        if ($request->has('estado') && $request->estado != '') {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->has('cliente') && $request->cliente != '') {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        $reservas = $query->orderBy('fecha', 'desc')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $filename = 'reservas_' . date('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($reservas) {
+            $file = fopen('php://output', 'w');
+
+            // BOM para Excel UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Encabezados
+            fputcsv($file, [
+                'ID',
+                'Fecha',
+                'Hora Inicio',
+                'Hora Fin',
+                'Cancha',
+                'Cliente',
+                'Teléfono',
+                'Email',
+                'Estado',
+                'Usuario',
+                'Duración (horas)',
+                'Observaciones'
+            ], ';');
+
+            // Datos
+            foreach ($reservas as $reserva) {
+                $horaInicio = Carbon::parse($reserva->hora_inicio);
+                $horaFin = Carbon::parse($reserva->hora_fin);
+                $duracion = $horaInicio->diffInHours($horaFin);
+
+                fputcsv($file, [
+                    $reserva->id,
+                    $reserva->fecha->format('d/m/Y'),
+                    $reserva->hora_inicio,
+                    $reserva->hora_fin,
+                    $reserva->cancha->nombre,
+                    $reserva->cliente->nombre,
+                    $reserva->cliente->telefono,
+                    $reserva->cliente->email ?? '',
+                    ucfirst($reserva->estado),
+                    $reserva->usuario->name ?? '',
+                    $duracion,
+                    $reserva->observaciones ?? ''
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

@@ -63,10 +63,10 @@
                                         <a href="{{ route('clientes.edit', $cliente) }}" class="btn btn-warning mb-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('clientes.destroy', $cliente) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('clientes.destroy', $cliente) }}" method="POST" class="d-inline form-delete">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                            <button type="submit" class="btn btn-danger btn-delete" data-title="¿Está seguro de eliminar este cliente?" data-text="Esta acción no se puede deshacer.">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -78,10 +78,10 @@
                                         <a href="{{ route('clientes.edit', $cliente) }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('clientes.destroy', $cliente) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('clientes.destroy', $cliente) }}" method="POST" class="d-inline form-delete">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                            <button type="submit" class="btn btn-sm btn-danger btn-delete" data-title="¿Está seguro de eliminar este cliente?" data-text="Esta acción no se puede deshacer.">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -102,5 +102,37 @@
             </div>
         </div>
     </div>
+@stop
+
+@section('js')
+    <script>
+        // Interceptar formularios de eliminación con SweetAlert
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.form-delete').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const button = form.querySelector('.btn-delete');
+                    const title = button.getAttribute('data-title') || '¿Está seguro?';
+                    const text = button.getAttribute('data-text') || 'Esta acción no se puede deshacer.';
+
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @stop
 

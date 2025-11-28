@@ -19,10 +19,23 @@
                     </a>
                 </div>
                 <div class="col-12 col-md-6">
-                    <form method="GET" action="{{ route('reservas.index') }}" class="form-inline float-md-right">
+                    <div class="float-md-right">
+                        <a href="{{ route('reservas.exportar.pdf', request()->query()) }}" class="btn btn-danger btn-sm btn-md-inline" target="_blank">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                        <a href="{{ route('reservas.exportar.excel', request()->query()) }}" class="btn btn-success btn-sm btn-md-inline">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <form method="GET" action="{{ route('reservas.index') }}" class="form-inline">
                         <div class="form-group mb-2 mb-md-0 mr-md-2">
+                            <label class="mr-2">Cancha:</label>
                             <select name="cancha_id" class="form-control form-control-sm">
-                                <option value="">Todas las canchas</option>
+                                <option value="">Todas</option>
                                 @foreach($canchas as $cancha)
                                     <option value="{{ $cancha->id }}" {{ request('cancha_id') == $cancha->id ? 'selected' : '' }}>
                                         {{ $cancha->nombre }}
@@ -31,10 +44,30 @@
                             </select>
                         </div>
                         <div class="form-group mb-2 mb-md-0 mr-md-2">
-                            <input type="date" name="fecha" class="form-control form-control-sm" value="{{ request('fecha') }}">
+                            <label class="mr-2">Desde:</label>
+                            <input type="date" name="fecha_desde" class="form-control form-control-sm" value="{{ request('fecha_desde') }}">
+                        </div>
+                        <div class="form-group mb-2 mb-md-0 mr-md-2">
+                            <label class="mr-2">Hasta:</label>
+                            <input type="date" name="fecha_hasta" class="form-control form-control-sm" value="{{ request('fecha_hasta') }}">
+                        </div>
+                        <div class="form-group mb-2 mb-md-0 mr-md-2">
+                            <label class="mr-2">Estado:</label>
+                            <select name="estado" class="form-control form-control-sm">
+                                <option value="">Todos</option>
+                                <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                                <option value="confirmada" {{ request('estado') == 'confirmada' ? 'selected' : '' }}>Confirmada</option>
+                                <option value="cancelada" {{ request('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                                <option value="completada" {{ request('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2 mb-md-0 mr-md-2">
+                            <label class="mr-2">Cliente:</label>
+                            <input type="text" name="cliente" class="form-control form-control-sm" placeholder="Buscar..." value="{{ request('cliente') }}">
                         </div>
                         <div class="form-group mb-2 mb-md-0">
                             <button type="submit" class="btn btn-secondary btn-sm">Filtrar</button>
+                            <a href="{{ route('reservas.index') }}" class="btn btn-outline-secondary btn-sm">Limpiar</a>
                         </div>
                     </form>
                 </div>
@@ -92,10 +125,10 @@
                                         <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-warning mb-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline form-delete">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar esta reserva?')">
+                                            <button type="submit" class="btn btn-danger btn-delete" data-title="¿Está seguro de eliminar esta reserva?" data-text="Esta acción no se puede deshacer.">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -107,10 +140,10 @@
                                         <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline form-delete">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar esta reserva?')">
+                                            <button type="submit" class="btn btn-sm btn-danger btn-delete" data-title="¿Está seguro de eliminar esta reserva?" data-text="Esta acción no se puede deshacer.">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -131,5 +164,37 @@
             </div>
         </div>
     </div>
+@stop
+
+@section('js')
+    <script>
+        // Interceptar formularios de eliminación con SweetAlert
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.form-delete').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const button = form.querySelector('.btn-delete');
+                    const title = button.getAttribute('data-title') || '¿Está seguro?';
+                    const text = button.getAttribute('data-text') || 'Esta acción no se puede deshacer.';
+
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @stop
 

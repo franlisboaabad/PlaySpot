@@ -7,6 +7,8 @@ use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\CanchaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\TutorialController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,6 +44,8 @@ Route::middleware('auth')->group(function () {
 
     // Rutas específicas de reservas ANTES del resource (para evitar conflictos)
     Route::get('reservas/calendario', [ReservaController::class, 'calendario'])->name('reservas.calendario');
+    Route::get('reservas/exportar/pdf', [ReservaController::class, 'exportarPdf'])->name('reservas.exportar.pdf');
+    Route::get('reservas/exportar/excel', [ReservaController::class, 'exportarExcel'])->name('reservas.exportar.excel');
     Route::get('api/reservas-calendario', [ReservaController::class, 'getReservasCalendario'])->name('api.reservas.calendario');
     Route::post('api/verificar-disponibilidad', [ReservaController::class, 'verificarDisponibilidad'])->name('api.reservas.verificar');
     Route::get('api/reservas-por-fecha', [ReservaController::class, 'getReservasPorFecha'])->name('api.reservas.por-fecha');
@@ -51,6 +55,12 @@ Route::middleware('auth')->group(function () {
 
     // Búsqueda de clientes (AJAX)
     Route::get('api/clientes/buscar', [ClienteController::class, 'buscar'])->name('api.clientes.buscar');
+
+    // Reportes
+    Route::get('reportes/ocupacion', [ReporteController::class, 'ocupacion'])->name('reportes.ocupacion');
+
+    // Tutoriales
+    Route::get('tutoriales', [TutorialController::class, 'index'])->name('tutoriales.index');
 });
 
 require __DIR__.'/auth.php';
