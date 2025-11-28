@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Reserva;
 use App\Models\Cancha;
+use App\Models\Cliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -139,6 +140,158 @@ class ReporteController extends Controller
             'fechaHasta',
             'canchas'
         ));
+    }
+
+    /**
+     * Reporte de Reservas por Período
+     */
+    public function reservas(Request $request)
+    {
+        $canchas = Cancha::where('activa', true)->get();
+
+        // Valores por defecto si no hay filtros
+        $fechaDesde = $request->get('fecha_desde', now()->subDays(30)->format('Y-m-d'));
+        $fechaHasta = $request->get('fecha_hasta', now()->format('Y-m-d'));
+
+        return view('admin.reportes.reservas', compact('canchas', 'fechaDesde', 'fechaHasta'));
+    }
+
+    /**
+     * Exportar reservas a PDF
+     */
+    public function exportarReservasPdf(Request $request)
+    {
+        $query = Reserva::with(['cancha', 'cliente', 'usuario']);
+
+        // Aplicar filtros
+        if ($request->has('cancha_id') && $request->cancha_id != '') {
+            $query->where('cancha_id', $request->cancha_id);
+        }
+
+        if ($request->has('fecha_desde') && $request->fecha_desde != '') {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->has('fecha_hasta') && $request->fecha_hasta != '') {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->has('estado') && $request->estado != '') {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->has('cliente') && $request->cliente != '') {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        $reservas = $query->orderBy('fecha', 'desc')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $filtros = [
+            'cancha' => $request->cancha_id ? Cancha::find($request->cancha_id)?->nombre : 'Todas',
+            'fecha_desde' => $request->fecha_desde ?? 'N/A',
+            'fecha_hasta' => $request->fecha_hasta ?? 'N/A',
+            'estado' => $request->estado ?? 'Todos',
+        ];
+
+        return view('admin.reservas.exportar-pdf', compact('reservas', 'filtros'));
+    }
+
+    /**
+     * Exportar reservas a Excel/CSV
+     */
+    public function exportarReservasExcel(Request $request)
+    {
+        $query = Reserva::with(['cancha', 'cliente', 'usuario']);
+
+        // Aplicar filtros
+        if ($request->has('cancha_id') && $request->cancha_id != '') {
+            $query->where('cancha_id', $request->cancha_id);
+        }
+
+        if ($request->has('fecha_desde') && $request->fecha_desde != '') {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->has('fecha_hasta') && $request->fecha_hasta != '') {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->has('estado') && $request->estado != '') {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->has('cliente') && $request->cliente != '') {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        $reservas = $query->orderBy('fecha', 'desc')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $filename = 'reservas_' . date('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($reservas) {
+            $file = fopen('php://output', 'w');
+
+            // BOM para Excel UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Encabezados
+            fputcsv($file, [
+                'ID',
+                'Fecha',
+                'Hora Inicio',
+                'Hora Fin',
+                'Cancha',
+                'Cliente',
+                'Teléfono',
+                'Email',
+                'Estado',
+                'Usuario',
+                'Duración (horas)',
+                'Observaciones'
+            ], ';');
+
+            // Datos
+            foreach ($reservas as $reserva) {
+                $horaInicio = Carbon::parse($reserva->hora_inicio);
+                $horaFin = Carbon::parse($reserva->hora_fin);
+                if ($horaFin->lt($horaInicio)) {
+                    $horaFin->addDay();
+                }
+                $duracion = $horaInicio->diffInHours($horaFin);
+
+                fputcsv($file, [
+                    $reserva->id,
+                    $reserva->fecha->format('d/m/Y'),
+                    $reserva->hora_inicio,
+                    $reserva->hora_fin,
+                    $reserva->cancha->nombre,
+                    $reserva->cliente->nombre,
+                    $reserva->cliente->telefono,
+                    $reserva->cliente->email ?? '',
+                    ucfirst($reserva->estado),
+                    $reserva->usuario->name ?? '',
+                    $duracion,
+                    $reserva->observaciones ?? ''
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
 

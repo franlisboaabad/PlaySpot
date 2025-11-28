@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard',[Dashboard::class,'home'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -44,8 +44,7 @@ Route::middleware('auth')->group(function () {
 
     // Rutas específicas de reservas ANTES del resource (para evitar conflictos)
     Route::get('reservas/calendario', [ReservaController::class, 'calendario'])->name('reservas.calendario');
-    Route::get('reservas/exportar/pdf', [ReservaController::class, 'exportarPdf'])->name('reservas.exportar.pdf');
-    Route::get('reservas/exportar/excel', [ReservaController::class, 'exportarExcel'])->name('reservas.exportar.excel');
+    Route::get('reservas/{reserva}/ticket', [ReservaController::class, 'ticketPdf'])->name('reservas.ticket');
     Route::get('api/reservas-calendario', [ReservaController::class, 'getReservasCalendario'])->name('api.reservas.calendario');
     Route::post('api/verificar-disponibilidad', [ReservaController::class, 'verificarDisponibilidad'])->name('api.reservas.verificar');
     Route::get('api/reservas-por-fecha', [ReservaController::class, 'getReservasPorFecha'])->name('api.reservas.por-fecha');
@@ -58,6 +57,9 @@ Route::middleware('auth')->group(function () {
 
     // Reportes
     Route::get('reportes/ocupacion', [ReporteController::class, 'ocupacion'])->name('reportes.ocupacion');
+    Route::get('reportes/reservas', [ReporteController::class, 'reservas'])->name('reportes.reservas');
+    Route::get('reportes/reservas/exportar/pdf', [ReporteController::class, 'exportarReservasPdf'])->name('reportes.exportar.reservas.pdf');
+    Route::get('reportes/reservas/exportar/excel', [ReporteController::class, 'exportarReservasExcel'])->name('reportes.exportar.reservas.excel');
 
     // Tutoriales
     Route::get('tutoriales', [TutorialController::class, 'index'])->name('tutoriales.index');

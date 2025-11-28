@@ -7,6 +7,15 @@
 @stop
 
 @section('content')
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-body">
             <div class="row">
@@ -98,6 +107,9 @@
             </div>
 
             <div class="mt-3">
+                <a href="{{ route('reservas.ticket', $reserva) }}" class="btn btn-danger btn-md-inline" download>
+                    <i class="fas fa-file-pdf"></i> Descargar Ticket PDF
+                </a>
                 <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-warning btn-md-inline">
                     <i class="fas fa-edit"></i> Editar
                 </a>

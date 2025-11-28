@@ -16,47 +16,12 @@ class ReservaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Reserva::with(['cancha', 'cliente', 'usuario']);
-
-        // Filtro por cancha
-        if ($request->has('cancha_id') && $request->cancha_id != '') {
-            $query->where('cancha_id', $request->cancha_id);
-        }
-
-        // Filtro por rango de fechas
-        if ($request->has('fecha_desde') && $request->fecha_desde != '') {
-            $query->where('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->has('fecha_hasta') && $request->fecha_hasta != '') {
-            $query->where('fecha', '<=', $request->fecha_hasta);
-        }
-
-        // Si solo hay fecha (sin rango), mantener compatibilidad
-        if ($request->has('fecha') && $request->fecha != '' && !$request->has('fecha_desde')) {
-            $query->where('fecha', $request->fecha);
-        }
-
-        // Filtro por estado
-        if ($request->has('estado') && $request->estado != '') {
-            $query->where('estado', $request->estado);
-        }
-
-        // Filtro por cliente (búsqueda por nombre)
-        if ($request->has('cliente') && $request->cliente != '') {
-            $query->whereHas('cliente', function($q) use ($request) {
-                $q->where('nombre', 'like', '%' . $request->cliente . '%');
-            });
-        }
-
-        $reservas = $query->orderBy('fecha', 'desc')
+        $reservas = Reserva::with(['cancha', 'cliente', 'usuario'])
+            ->orderBy('fecha', 'desc')
             ->orderBy('hora_inicio')
-            ->paginate(20)
-            ->appends($request->query());
+            ->get();
 
-        $canchas = Cancha::where('activa', true)->get();
-
-        return view('admin.reservas.index', compact('reservas', 'canchas'));
+        return view('admin.reservas.index', compact('reservas'));
     }
 
     /**
@@ -149,7 +114,7 @@ class ReservaController extends Controller
             ])->withInput();
         }
 
-        Reserva::create([
+        $reserva = Reserva::create([
             'cancha_id' => $request->cancha_id,
             'cliente_id' => $request->cliente_id,
             'user_id' => auth()->id(),
@@ -160,8 +125,8 @@ class ReservaController extends Controller
             'observaciones' => $request->observaciones,
         ]);
 
-        return redirect()->route('reservas.index')
-            ->with('success', 'Reserva creada exitosamente');
+        return redirect()->route('reservas.show', $reserva)
+            ->with('success', 'Reserva creada exitosamente. Puedes descargar el ticket PDF para enviarlo al cliente.');
     }
 
     /**
@@ -499,5 +464,21 @@ class ReservaController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Generar ticket PDF de la reserva
+     */
+    public function ticketPdf(Reserva $reserva)
+    {
+        $reserva->load(['cancha', 'cliente', 'usuario']);
+
+        // Forzar descarga del PDF
+        $html = view('admin.reservas.ticket-pdf', compact('reserva'))->render();
+        $filename = 'ticket_reserva_' . str_pad($reserva->id, 6, '0', STR_PAD_LEFT) . '.html';
+
+        return response($html, 200)
+            ->header('Content-Type', 'text/html; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

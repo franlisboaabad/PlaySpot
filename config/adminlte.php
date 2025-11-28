@@ -345,6 +345,11 @@ return [
             'icon'        => 'fas fa-chart-bar',
             'submenu' => [
                 [
+                    'text' => 'Reservas por Período',
+                    'route' => 'reportes.reservas',
+                    'icon' => 'fas fa-file-alt',
+                ],
+                [
                     'text' => 'Ocupación de Canchas',
                     'route' => 'reportes.ocupacion',
                     'icon' => 'fas fa-chart-pie',

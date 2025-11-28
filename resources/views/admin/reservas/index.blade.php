@@ -11,65 +11,12 @@
         <div class="card-header">
             <div class="row">
                 <div class="col-12 col-md-6 mb-2 mb-md-0">
-                    <a href="{{ route('reservas.create') }}" class="btn btn-primary btn-sm btn-md-inline">
+                    <a href="{{ route('reservas.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Nueva Reserva
                     </a>
-                    <a href="{{ route('reservas.calendario') }}" class="btn btn-info btn-sm btn-md-inline">
+                    <a href="{{ route('reservas.calendario') }}" class="btn btn-info btn-sm">
                         <i class="fas fa-calendar"></i> Ver Calendario
                     </a>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="float-md-right">
-                        <a href="{{ route('reservas.exportar.pdf', request()->query()) }}" class="btn btn-danger btn-sm btn-md-inline" target="_blank">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </a>
-                        <a href="{{ route('reservas.exportar.excel', request()->query()) }}" class="btn btn-success btn-sm btn-md-inline">
-                            <i class="fas fa-file-excel"></i> Excel
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-12">
-                    <form method="GET" action="{{ route('reservas.index') }}" class="form-inline">
-                        <div class="form-group mb-2 mb-md-0 mr-md-2">
-                            <label class="mr-2">Cancha:</label>
-                            <select name="cancha_id" class="form-control form-control-sm">
-                                <option value="">Todas</option>
-                                @foreach($canchas as $cancha)
-                                    <option value="{{ $cancha->id }}" {{ request('cancha_id') == $cancha->id ? 'selected' : '' }}>
-                                        {{ $cancha->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group mb-2 mb-md-0 mr-md-2">
-                            <label class="mr-2">Desde:</label>
-                            <input type="date" name="fecha_desde" class="form-control form-control-sm" value="{{ request('fecha_desde') }}">
-                        </div>
-                        <div class="form-group mb-2 mb-md-0 mr-md-2">
-                            <label class="mr-2">Hasta:</label>
-                            <input type="date" name="fecha_hasta" class="form-control form-control-sm" value="{{ request('fecha_hasta') }}">
-                        </div>
-                        <div class="form-group mb-2 mb-md-0 mr-md-2">
-                            <label class="mr-2">Estado:</label>
-                            <select name="estado" class="form-control form-control-sm">
-                                <option value="">Todos</option>
-                                <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                                <option value="confirmada" {{ request('estado') == 'confirmada' ? 'selected' : '' }}>Confirmada</option>
-                                <option value="cancelada" {{ request('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
-                                <option value="completada" {{ request('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
-                            </select>
-                        </div>
-                        <div class="form-group mb-2 mb-md-0 mr-md-2">
-                            <label class="mr-2">Cliente:</label>
-                            <input type="text" name="cliente" class="form-control form-control-sm" placeholder="Buscar..." value="{{ request('cliente') }}">
-                        </div>
-                        <div class="form-group mb-2 mb-md-0">
-                            <button type="submit" class="btn btn-secondary btn-sm">Filtrar</button>
-                            <a href="{{ route('reservas.index') }}" class="btn btn-outline-secondary btn-sm">Limpiar</a>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
@@ -84,28 +31,28 @@
             @endif
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+                <table id="reservasTable" class="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Fecha</th>
                             <th>Horario</th>
                             <th>Cancha</th>
-                            <th class="d-none d-md-table-cell">Cliente</th>
-                            <th class="d-none d-lg-table-cell">Teléfono</th>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($reservas as $reserva)
+                        @foreach($reservas as $reserva)
                             <tr>
                                 <td>{{ $reserva->id }}</td>
                                 <td>{{ $reserva->fecha->format('d/m/Y') }}</td>
                                 <td>{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</td>
                                 <td>{{ $reserva->cancha->nombre }}</td>
-                                <td class="d-none d-md-table-cell">{{ $reserva->cliente->nombre }}</td>
-                                <td class="d-none d-lg-table-cell">{{ $reserva->cliente->telefono }}</td>
+                                <td>{{ $reserva->cliente->nombre }}</td>
+                                <td>{{ $reserva->cliente->telefono }}</td>
                                 <td>
                                     @if($reserva->estado == 'confirmada')
                                         <span class="badge badge-success">Confirmada</span>
@@ -118,58 +65,61 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="btn-group-vertical btn-group-sm d-md-none" role="group">
-                                        <a href="{{ route('reservas.show', $reserva) }}" class="btn btn-info mb-1">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-warning mb-1">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline form-delete">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-delete" data-title="¿Está seguro de eliminar esta reserva?" data-text="Esta acción no se puede deshacer.">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <div class="btn-group d-none d-md-inline-flex" role="group">
-                                        <a href="{{ route('reservas.show', $reserva) }}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('reservas.edit', $reserva) }}" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline form-delete">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger btn-delete" data-title="¿Está seguro de eliminar esta reserva?" data-text="Esta acción no se puede deshacer.">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{{ route('reservas.ticket', $reserva) }}" download>
+                                                <i class="fas fa-file-pdf text-danger"></i> Descargar Ticket PDF
+                                            </a>
+                                            <a class="dropdown-item" href="{{ route('reservas.show', $reserva) }}">
+                                                <i class="fas fa-eye text-info"></i> Ver Detalles
+                                            </a>
+                                            <a class="dropdown-item" href="{{ route('reservas.edit', $reserva) }}">
+                                                <i class="fas fa-edit text-warning"></i> Editar
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="d-inline form-delete">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger btn-delete" data-title="¿Está seguro de eliminar esta reserva?" data-text="Esta acción no se puede deshacer.">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center">No hay reservas registradas</td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
-            </div>
-
-            <div class="d-flex justify-content-center">
-                {{ $reservas->links() }}
             </div>
         </div>
     </div>
 @stop
 
+@section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
+@stop
+
 @section('js')
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
     <script>
-        // Interceptar formularios de eliminación con SweetAlert
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
+            // Inicializar DataTables
+            $('#reservasTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+                },
+                "order": [[0, "desc"]], // Ordenar por ID descendente
+                "pageLength": 25,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                "responsive": true
+            });
+
+            // Interceptar formularios de eliminación con SweetAlert
             document.querySelectorAll('.form-delete').forEach(function(form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -197,4 +147,3 @@
         });
     </script>
 @stop
-
