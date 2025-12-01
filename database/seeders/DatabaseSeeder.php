@@ -20,10 +20,10 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\User::factory()->create(
             [
-                'name' => 'Frank Lisboa Abad',
-                'email' => 'frank@admin.com',
+                'name' => 'Administrador',
+                'email' => 'admin@admin.com',
                 'email_verified_at' => now(),
-                'password' => bcrypt('secret'), // password
+                'password' => bcrypt('070893'), // password
             ]
         )->assignRole('Admin');
 
